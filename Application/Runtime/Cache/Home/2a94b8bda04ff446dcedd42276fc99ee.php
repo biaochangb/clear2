@@ -1,43 +1,47 @@
-<?php if (!defined('THINK_PATH')) exit();?><!DOCTYPE html>
-<html>
-  <head>
-    <style type="text/css">
-      html, body, #map-canvas { height: 100%; margin: 0; padding: 0;}
-    </style><script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false&language=en">
-		//zh-CN: Chinese (Simplified)
-	</script> 
-
-    <script type="text/javascript">
-	var marker;
-var map;
-      function initialize() {
-        var mapOptions = {
-          center: { lat: 35, lng: 105},
-          zoom: 5
-        };
-         map = new google.maps.Map(document.getElementById('map-canvas'),
-            mapOptions);
-					var myLatlng = new google.maps.LatLng(35,110);
-		 marker = new google.maps.Marker({
-			  position: myLatlng,
-			  map: map,
-			  title: 'Hello World!'
-		  });
-		google.maps.event.addListener(marker, 'click', toggleBounce);  
-      }
-	  
-function toggleBounce() {
-
-  if (marker.getAnimation() != null) {
-    marker.setAnimation(null);
-  } else {
-    marker.setAnimation(google.maps.Animation.BOUNCE);
-  }
-}
-      google.maps.event.addDomListener(window, 'load', initialize);
-    </script>
-  </head>
-  <body>
+<?php if (!defined('THINK_PATH')) exit(); echo W("MyLayout/homeHeader");?> <?php echo W("MyLayout/navbar");?> <?php echo W("MyLayout/googleMap");?>
 <div id="map-canvas"></div>
-  </body>
-</html>
+<div class="container">
+    <div class="popover right transparent">
+        <div class="arrow"></div>
+        <h3 class="popover-title "><i class="icon-tasks"></i> &nbsp;Online Events</h3>
+        <div class="popover-content">
+            <div class="row ">
+                <div class="span12">
+                    <form class="form-search">
+                        <div class="input-append">
+                            <input type="text" class="span2 search-query">
+                            <button type="submit" class="btn">Search</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <ol class="nav nav-pills nav-stacked numbered">
+                <li class=""><a href="#">signed day, @chelseafc</a></li>
+                <li><a href="#">signed day, @chelseafc</a></li>
+                <li><a href="#">signed day, @chelseafc</a></li>
+            </ol>
+            <!-- <ol>
+                <li>
+                    <div class="row-fluid">
+                        <div class="span10">
+                            <a href="">signed day, @chelseafc</a>
+                        </div>
+                        <div class="span2">
+                            <div class="progress">
+                                <div class="bar bar-danger" style="width: 100%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+            </ol> -->
+        </div>
+    </div>
+</div>
+<style type="text/css">
+#map-canvas {
+    height: 750px;
+    margin: 40px 0 0;
+    padding: 0;
+}
+</style>
+<?php echo W("MyLayout/homeFooter");?>

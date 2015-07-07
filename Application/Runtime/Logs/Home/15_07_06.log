@@ -77,3 +77,6 @@ INFO: [ app_begin ] --START--
 INFO: Run Behavior\ReadHtmlCacheBehavior [ RunTime:0.004000s ]
 INFO: [ app_begin ] --END-- [ RunTime:0.004000s ]
 
+[ 2015-07-06T20:30:32+08:00 ] 127.0.0.1 /clear2/home/index/index-copy.html
+ERR: 非法操作:index-copy
+
