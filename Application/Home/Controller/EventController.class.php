@@ -2,6 +2,604 @@
 namespace Home\Controller;
 use Think\Controller;
 class EventController extends Controller {
+	private $pinnacle = "http://research.pinnacle.smu.edu.sg/clear/";
+	private $event_type_map = ["All", "Local", "Global"];
+
+	/**
+	 * get the information about events with type of $type.
+	 * @param  int $type  
+	 * @param  int $limit -  get the latest $limit events  with type of $type.
+	 * @return object
+	 */
+	public function types($type, $limit=10){
+		$demo_episode = M('demo_episode');
+		//echo $demo_episode->where("type={$type}")->order("time desc")->count();
+		$result =  array();
+		$result['meta']['X-RateLimit-Limit'] = 5000;
+		$result['meta']['X-RateLimit-Remaining'] = 4813;
+		$result['meta']['X-RateLimit-Reset'] = 1438671351;
+		$result['meta']['Cache-Control'] = "public, max-age=60, s-maxage=60";
+		$result['meta']['Vary'] = "Accept";
+		$result['meta']['ETag'] = "2c2ce72be7b7ff44b0142928f5a9a73d";
+		$result['meta']['status'] = 200;
+		$data['login'] = $type;
+		// $data['login'] = $this->event_type_map[$type];
+		$data['type'] = $type;
+		$data['repos_url'] = U("Event/events",array('type'=>$type,'limit'=>$limit),true,true);
+		$data['public_repos'] = $demo_episode->where("type={$type}")->order("time desc")->limit($limit)->count();
+		$data['avatar_url'] = "http://localhost/clear2/Public/image/favicon.ico";
+
+		$result['data'] = $data;
+
+		$this->ajaxReturn($result, 'jsonp');
+	}
+
+	public function events($type, $limit=10){
+		$demo_episode = M('demo_episode');
+		$list = $demo_episode->where("type={$type}")->limit($limit)->select();
+
+		$result =  array();
+		$result['meta']['X-RateLimit-Limit'] = 5000;
+		$result['meta']['X-RateLimit-Remaining'] = 4813;
+		$result['meta']['X-RateLimit-Reset'] = 1438671351;
+		$result['meta']['Cache-Control'] = "public, max-age=60, s-maxage=60";
+		$result['meta']['Vary'] = "Accept";
+		$result['meta']['ETag'] = "2c2ce72be7b7ff44b0142928f5a9a73d";
+		$result['meta']['status'] = 200;
+		foreach ($list as $row) {
+			$event['id'] = $row['eid'];
+			$event['name'] = $row['keywords'];
+			$event['url'] = $this->pinnacle."detail.php?eid=".$row['eid'];
+			$event['html_url'] = $this->pinnacle."detail.php?eid=".$row['eid'];
+			$event['commits_url'] = U("Event/users",array('eid'=>$row['eid']),true,true);
+			$event['size'] = $row['numtweets'];
+			$event['pushed_at'] = $row['time'];
+			$event['updated_at'] =  $row['time'];
+			$event['created_at'] =  $row['time'];
+			$event['description'] =  $row['keywords'];
+			$event['language'] = $row['eid'];
+			//$event['language'] = $this->event_type_map[$type];
+			$event['forks'] =  $row['numgeousers'];
+			$event['watchers'] =  $row['numtweets'];
+			$event['fork'] =  "false";
+			$data[] = $event;
+		}
+		$result['data'] = $data;
+		$this->ajaxReturn($result, 'jsonp');
+	}
+
+	public function users($eid=0, $per_page = 100){
+		$result =  array();
+		$result['meta']['X-RateLimit-Limit'] = 5000;
+		$result['meta']['X-RateLimit-Remaining'] = 4813;
+		$result['meta']['X-RateLimit-Reset'] = 1438671351;
+		$result['meta']['Cache-Control'] = "public, max-age=60, s-maxage=60";
+		$result['meta']['Vary'] = "Accept";
+		$result['meta']['ETag'] = "2c2ce72be7b7ff44b0142928f5a9a73d";
+		$result['meta']['status'] = 200;
+		$data_str = '
+[
+  {
+    "sha": "8ffbb5974a1d9e28aa93aefd069610c5162450be",
+    "commit": {
+      "author": {
+        "name": "Biao Chang",
+        "email": "985966377@qq.com",
+        "date": "2015-07-10T03:10:56Z"
+      },
+      "committer": {
+        "name": "Biao Chang",
+        "email": "985966377@qq.com",
+        "date": "2015-07-10T03:10:56Z"
+      },
+      "message": "ignore Runtime",
+      "tree": {
+        "sha": "a4096218b1149183ac5dad0cb364ee9428b67354",
+        "url": "https://api.github.com/repos/biaochangb/clear2/git/trees/a4096218b1149183ac5dad0cb364ee9428b67354"
+      },
+      "url": "https://api.github.com/repos/biaochangb/clear2/git/commits/8ffbb5974a1d9e28aa93aefd069610c5162450be",
+      "comment_count": 0
+    },
+    "url": "http://10.4.8.108/clear2/index.php/Home/Event/retweetUsers.html",
+    "html_url": "https://github.com/biaochangb/clear2/commit/8ffbb5974a1d9e28aa93aefd069610c5162450be",
+    "comments_url": "https://api.github.com/repos/biaochangb/clear2/commits/8ffbb5974a1d9e28aa93aefd069610c5162450be/comments",
+    "author": {
+      "login": "biaochangb",
+      "id": 11438882,
+      "avatar_url": "https://avatars.githubusercontent.com/u/11438882?v=3",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/biaochangb",
+      "html_url": "https://github.com/biaochangb",
+      "followers_url": "https://api.github.com/users/biaochangb/followers",
+      "following_url": "https://api.github.com/users/biaochangb/following{/other_user}",
+      "gists_url": "https://api.github.com/users/biaochangb/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/biaochangb/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/biaochangb/subscriptions",
+      "organizations_url": "https://api.github.com/users/biaochangb/orgs",
+      "repos_url": "https://api.github.com/users/biaochangb/repos",
+      "events_url": "https://api.github.com/users/biaochangb/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/biaochangb/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "biaochangb",
+      "id": 11438882,
+      "avatar_url": "https://avatars.githubusercontent.com/u/11438882?v=3",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/biaochangb",
+      "html_url": "https://github.com/biaochangb",
+      "followers_url": "https://api.github.com/users/biaochangb/followers",
+      "following_url": "https://api.github.com/users/biaochangb/following{/other_user}",
+      "gists_url": "https://api.github.com/users/biaochangb/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/biaochangb/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/biaochangb/subscriptions",
+      "organizations_url": "https://api.github.com/users/biaochangb/orgs",
+      "repos_url": "https://api.github.com/users/biaochangb/repos",
+      "events_url": "https://api.github.com/users/biaochangb/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/biaochangb/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "cc4694eff6e862d4b5c84ed63e67e7859ab44586",
+        "url": "https://api.github.com/repos/biaochangb/clear2/commits/cc4694eff6e862d4b5c84ed63e67e7859ab44586",
+        "html_url": "https://github.com/biaochangb/clear2/commit/cc4694eff6e862d4b5c84ed63e67e7859ab44586"
+      }
+    ]
+  },
+  {
+    "sha": "cc4694eff6e862d4b5c84ed63e67e7859ab44586",
+    "commit": {
+      "author": {
+        "name": "Biao Chang",
+        "email": "985966377@qq.com",
+        "date": "2015-07-10T03:10:16Z"
+      },
+      "committer": {
+        "name": "Biao Chang",
+        "email": "985966377@qq.com",
+        "date": "2015-07-10T03:10:16Z"
+      },
+      "message": "bs3",
+      "tree": {
+        "sha": "76ffd09df05c3b8480552ab1631909781ad89de2",
+        "url": "https://api.github.com/repos/biaochangb/clear2/git/trees/76ffd09df05c3b8480552ab1631909781ad89de2"
+      },
+      "url": "https://api.github.com/repos/biaochangb/clear2/git/commits/cc4694eff6e862d4b5c84ed63e67e7859ab44586",
+      "comment_count": 0
+    },
+    "url": "http://10.4.8.108/clear2/index.php/Home/Event/retweetUsers.html",
+    "html_url": "https://github.com/biaochangb/clear2/commit/cc4694eff6e862d4b5c84ed63e67e7859ab44586",
+    "comments_url": "https://api.github.com/repos/biaochangb/clear2/commits/cc4694eff6e862d4b5c84ed63e67e7859ab44586/comments",
+    "author": {
+      "login": "biaochangb",
+      "id": 11438882,
+      "avatar_url": "https://avatars.githubusercontent.com/u/11438882?v=3",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/biaochangb",
+      "html_url": "https://github.com/biaochangb",
+      "followers_url": "https://api.github.com/users/biaochangb/followers",
+      "following_url": "https://api.github.com/users/biaochangb/following{/other_user}",
+      "gists_url": "https://api.github.com/users/biaochangb/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/biaochangb/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/biaochangb/subscriptions",
+      "organizations_url": "https://api.github.com/users/biaochangb/orgs",
+      "repos_url": "https://api.github.com/users/biaochangb/repos",
+      "events_url": "https://api.github.com/users/biaochangb/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/biaochangb/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "biaochangb",
+      "id": 11438882,
+      "avatar_url": "https://avatars.githubusercontent.com/u/11438882?v=3",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/biaochangb",
+      "html_url": "https://github.com/biaochangb",
+      "followers_url": "https://api.github.com/users/biaochangb/followers",
+      "following_url": "https://api.github.com/users/biaochangb/following{/other_user}",
+      "gists_url": "https://api.github.com/users/biaochangb/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/biaochangb/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/biaochangb/subscriptions",
+      "organizations_url": "https://api.github.com/users/biaochangb/orgs",
+      "repos_url": "https://api.github.com/users/biaochangb/repos",
+      "events_url": "https://api.github.com/users/biaochangb/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/biaochangb/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "ed54a190f52d736c191caf347184a8d307b63a14",
+        "url": "https://api.github.com/repos/biaochangb/clear2/commits/ed54a190f52d736c191caf347184a8d307b63a14",
+        "html_url": "https://github.com/biaochangb/clear2/commit/ed54a190f52d736c191caf347184a8d307b63a14"
+      }
+    ]
+  },
+  {
+    "sha": "ed54a190f52d736c191caf347184a8d307b63a14",
+    "commit": {
+      "author": {
+        "name": "Biao Chang",
+        "email": "985966377@qq.com",
+        "date": "2015-07-07T05:56:20Z"
+      },
+      "committer": {
+        "name": "Biao Chang",
+        "email": "985966377@qq.com",
+        "date": "2015-07-07T05:56:20Z"
+      },
+      "message": "add bootstrap",
+      "tree": {
+        "sha": "ad5ecfa2eb5b28c947359ddc428bb14d1a07c285",
+        "url": "https://api.github.com/repos/biaochangb/clear2/git/trees/ad5ecfa2eb5b28c947359ddc428bb14d1a07c285"
+      },
+      "url": "https://api.github.com/repos/biaochangb/clear2/git/commits/ed54a190f52d736c191caf347184a8d307b63a14",
+      "comment_count": 0
+    },
+    "url": "http://10.4.8.108/clear2/index.php/Home/Event/retweetUsers.html",
+    "html_url": "https://github.com/biaochangb/clear2/commit/ed54a190f52d736c191caf347184a8d307b63a14",
+    "comments_url": "https://api.github.com/repos/biaochangb/clear2/commits/ed54a190f52d736c191caf347184a8d307b63a14/comments",
+    "author": {
+      "login": "biaochangb",
+      "id": 11438882,
+      "avatar_url": "https://avatars.githubusercontent.com/u/11438882?v=3",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/biaochangb",
+      "html_url": "https://github.com/biaochangb",
+      "followers_url": "https://api.github.com/users/biaochangb/followers",
+      "following_url": "https://api.github.com/users/biaochangb/following{/other_user}",
+      "gists_url": "https://api.github.com/users/biaochangb/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/biaochangb/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/biaochangb/subscriptions",
+      "organizations_url": "https://api.github.com/users/biaochangb/orgs",
+      "repos_url": "https://api.github.com/users/biaochangb/repos",
+      "events_url": "https://api.github.com/users/biaochangb/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/biaochangb/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "biaochangb",
+      "id": 11438882,
+      "avatar_url": "https://avatars.githubusercontent.com/u/11438882?v=3",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/biaochangb",
+      "html_url": "https://github.com/biaochangb",
+      "followers_url": "https://api.github.com/users/biaochangb/followers",
+      "following_url": "https://api.github.com/users/biaochangb/following{/other_user}",
+      "gists_url": "https://api.github.com/users/biaochangb/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/biaochangb/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/biaochangb/subscriptions",
+      "organizations_url": "https://api.github.com/users/biaochangb/orgs",
+      "repos_url": "https://api.github.com/users/biaochangb/repos",
+      "events_url": "https://api.github.com/users/biaochangb/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/biaochangb/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "e053d3f5527bac99393dfb8db4fd4c395c14d799",
+        "url": "https://api.github.com/repos/biaochangb/clear2/commits/e053d3f5527bac99393dfb8db4fd4c395c14d799",
+        "html_url": "https://github.com/biaochangb/clear2/commit/e053d3f5527bac99393dfb8db4fd4c395c14d799"
+      }
+    ]
+  },
+  {
+    "sha": "e053d3f5527bac99393dfb8db4fd4c395c14d799",
+    "commit": {
+      "author": {
+        "name": "Biao Chang",
+        "email": "985966377@qq.com",
+        "date": "2015-07-06T08:47:46Z"
+      },
+      "committer": {
+        "name": "Biao Chang",
+        "email": "985966377@qq.com",
+        "date": "2015-07-06T08:47:46Z"
+      },
+      "message": "initialize\n\ninitialize",
+      "tree": {
+        "sha": "c87f1cb02dbdd6883b8608cd77cfeb35b7c24088",
+        "url": "https://api.github.com/repos/biaochangb/clear2/git/trees/c87f1cb02dbdd6883b8608cd77cfeb35b7c24088"
+      },
+      "url": "https://api.github.com/repos/biaochangb/clear2/git/commits/e053d3f5527bac99393dfb8db4fd4c395c14d799",
+      "comment_count": 0
+    },
+    "url": "http://10.4.8.108/clear2/index.php/Home/Event/retweetUsers.html",
+    "html_url": "https://github.com/biaochangb/clear2/commit/e053d3f5527bac99393dfb8db4fd4c395c14d799",
+    "comments_url": "https://api.github.com/repos/biaochangb/clear2/commits/e053d3f5527bac99393dfb8db4fd4c395c14d799/comments",
+    "author": {
+      "login": "biaochangb",
+      "id": 11438882,
+      "avatar_url": "https://avatars.githubusercontent.com/u/11438882?v=3",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/biaochangb",
+      "html_url": "https://github.com/biaochangb",
+      "followers_url": "https://api.github.com/users/biaochangb/followers",
+      "following_url": "https://api.github.com/users/biaochangb/following{/other_user}",
+      "gists_url": "https://api.github.com/users/biaochangb/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/biaochangb/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/biaochangb/subscriptions",
+      "organizations_url": "https://api.github.com/users/biaochangb/orgs",
+      "repos_url": "https://api.github.com/users/biaochangb/repos",
+      "events_url": "https://api.github.com/users/biaochangb/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/biaochangb/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "biaochangb",
+      "id": 11438882,
+      "avatar_url": "https://avatars.githubusercontent.com/u/11438882?v=3",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/biaochangb",
+      "html_url": "https://github.com/biaochangb",
+      "followers_url": "https://api.github.com/users/biaochangb/followers",
+      "following_url": "https://api.github.com/users/biaochangb/following{/other_user}",
+      "gists_url": "https://api.github.com/users/biaochangb/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/biaochangb/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/biaochangb/subscriptions",
+      "organizations_url": "https://api.github.com/users/biaochangb/orgs",
+      "repos_url": "https://api.github.com/users/biaochangb/repos",
+      "events_url": "https://api.github.com/users/biaochangb/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/biaochangb/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "ac5be7103f0a540b58e7d164e8d2d0f64627ee6a",
+        "url": "https://api.github.com/repos/biaochangb/clear2/commits/ac5be7103f0a540b58e7d164e8d2d0f64627ee6a",
+        "html_url": "https://github.com/biaochangb/clear2/commit/ac5be7103f0a540b58e7d164e8d2d0f64627ee6a"
+      }
+    ]
+  },
+  {
+    "sha": "ac5be7103f0a540b58e7d164e8d2d0f64627ee6a",
+    "commit": {
+      "author": {
+        "name": "Biao Chang",
+        "email": "985966377@qq.com",
+        "date": "2015-07-06T06:16:05Z"
+      },
+      "committer": {
+        "name": "Biao Chang",
+        "email": "985966377@qq.com",
+        "date": "2015-07-06T06:16:05Z"
+      },
+      "message": ":confetti_ball: Added .gitattributes & .gitignore files",
+      "tree": {
+        "sha": "19ce9d8ff1fccf510df82d99a65f48c649b7becd",
+        "url": "https://api.github.com/repos/biaochangb/clear2/git/trees/19ce9d8ff1fccf510df82d99a65f48c649b7becd"
+      },
+      "url": "https://api.github.com/repos/biaochangb/clear2/git/commits/ac5be7103f0a540b58e7d164e8d2d0f64627ee6a",
+      "comment_count": 0
+    },
+    "url": "http://10.4.8.108/clear2/index.php/Home/Event/retweetUsers.html",
+    "html_url": "https://github.com/biaochangb/clear2/commit/ac5be7103f0a540b58e7d164e8d2d0f64627ee6a",
+    "comments_url": "https://api.github.com/repos/biaochangb/clear2/commits/ac5be7103f0a540b58e7d164e8d2d0f64627ee6a/comments",
+    "author": {
+      "login": "biaochangb",
+      "id": 11438882,
+      "avatar_url": "https://avatars.githubusercontent.com/u/11438882?v=3",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/biaochangb",
+      "html_url": "https://github.com/biaochangb",
+      "followers_url": "https://api.github.com/users/biaochangb/followers",
+      "following_url": "https://api.github.com/users/biaochangb/following{/other_user}",
+      "gists_url": "https://api.github.com/users/biaochangb/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/biaochangb/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/biaochangb/subscriptions",
+      "organizations_url": "https://api.github.com/users/biaochangb/orgs",
+      "repos_url": "https://api.github.com/users/biaochangb/repos",
+      "events_url": "https://api.github.com/users/biaochangb/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/biaochangb/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "biaochangb",
+      "id": 11438882,
+      "avatar_url": "https://avatars.githubusercontent.com/u/11438882?v=3",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/biaochangb",
+      "html_url": "https://github.com/biaochangb",
+      "followers_url": "https://api.github.com/users/biaochangb/followers",
+      "following_url": "https://api.github.com/users/biaochangb/following{/other_user}",
+      "gists_url": "https://api.github.com/users/biaochangb/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/biaochangb/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/biaochangb/subscriptions",
+      "organizations_url": "https://api.github.com/users/biaochangb/orgs",
+      "repos_url": "https://api.github.com/users/biaochangb/repos",
+      "events_url": "https://api.github.com/users/biaochangb/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/biaochangb/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "parents": [
+
+    ]
+  }
+]
+';
+		$data = array();
+		$demo_tweets = M('demo_tweets');
+		$demo_users = M('demo_users');
+		$rows = $demo_tweets->where("eid={$eid}")->order("createdAt desc")->limit($per_page)->select();
+		$user_profiles = array();
+		foreach ($rows as $key => $row) {
+			if (!array_key_exists($user_profiles)){
+				$profile = $demo_users->where("uid=".$row['userid'])->limit(1)->select();
+				if (count($profile)>0) {
+					$user_profiles[$row['userid']] = $profile[0];
+				}else{
+					$user_profiles[$row['userid']] = array("screenname"=>"unknown","email"=>"test@qq.com","createdat"=>"1970-00-00 0:0:0","userimageurl"=>"");
+				}
+			}
+			//$user_profiles[$row['userid']]['userimageurl'] = "https://avatars.githubusercontent.com/u/11438882?v=3";
+			$commit = array();
+			$commit['sha'] = strval($row['userid']);
+			$commit['commit']['author']['name'] = $user_profiles[$row['userid']]['screenname'];
+			$commit['commit']['author']['email'] = $user_profiles[$row['userid']]['screenname'];
+			$commit['commit']['author']['date'] = date("Y-m-d\TH:i:s\Z", strtotime($row['createdat']));
+			$commit['commit']['committer']['name'] = $user_profiles[$row['userid']]['screenname'];
+			$commit['commit']['committer']['email'] = $user_profiles[$row['userid']]['screenname'];
+			$commit['commit']['committer']['date'] = date("Y-m-d\TH:i:s\Z", strtotime($row['createdat']));
+			$commit['commit']['message'] = $row['text'];
+
+			$commit['url'] = U("Event/retweetUsers",array('uid'=>$row['userid']),true,true);
+			$commit['html_url'] = $commit['url'];
+
+			$commit['author']['avatar_url'] =  $user_profiles[$rows[0]['userid']]['userimageurl'];
+			$commit['author']['login'] = $user_profiles[$rows[0]['userid']]['screenname'];
+			$commit['committer']['avatar_url'] =$user_profiles[$row['userid']]['userimageurl'];
+			$commit['committer']['login'] = $user_profiles[$row['userid']]['screenname'];
+
+			$commit['parents'] = array();
+			if ($key>0) {
+				$commit['parents'][0]['sha'] = $data[$key-1]['sha'];
+				$commit['parents'][0]['url'] = $data[$key-1]['url'];
+				$commit['parents'][0]['html_url'] = $data[$key-1]['html_url'];
+			}
+			$data[] = $commit;
+		}
+		//var_dump($user_profiles);
+		$result['data'] = $data;
+		// $result['data'] = json_decode($data_str);
+		$this->ajaxReturn($result, 'jsonp');
+	}
+
+	public function retweetUsers($uid=0){
+		$result =  array();
+		$result['meta']['X-RateLimit-Limit'] = 5000;
+		$result['meta']['X-RateLimit-Remaining'] = 4813;
+		$result['meta']['X-RateLimit-Reset'] = 1438671351;
+		$result['meta']['Cache-Control'] = "public, max-age=60, s-maxage=60";
+		$result['meta']['Vary'] = "Accept";
+		$result['meta']['ETag'] = "2c2ce72be7b7ff44b0142928f5a9a73d";
+		$result['meta']['status'] = 200;
+		$data = '
+{
+  "sha": "'.$uid.'",
+  "commit": {
+    "author": {
+      "name": "Biao Chang",
+      "email": "985966377@qq.com",
+      "date": "2015-07-10T03:10:56Z"
+    },
+    "committer": {
+      "name": "Biao Chang",
+      "email": "985966377@qq.com",
+      "date": "2015-07-10T03:10:56Z"
+    },
+    "message": "ignore Runtime",
+    "tree": {
+      "sha": "a4096218b1149183ac5dad0cb364ee9428b67354",
+      "url": "https://api.github.com/repos/biaochangb/clear2/git/trees/a4096218b1149183ac5dad0cb364ee9428b67354"
+    },
+    "url": "https://api.github.com/repos/biaochangb/clear2/git/commits/8ffbb5974a1d9e28aa93aefd069610c5162450be",
+    "comment_count": 0
+  },
+  "url": "https://api.github.com/repos/biaochangb/clear2/commits/8ffbb5974a1d9e28aa93aefd069610c5162450be",
+  "html_url": "https://github.com/biaochangb/clear2/commit/8ffbb5974a1d9e28aa93aefd069610c5162450be",
+  "comments_url": "https://api.github.com/repos/biaochangb/clear2/commits/8ffbb5974a1d9e28aa93aefd069610c5162450be/comments",
+  "author": {
+    "login": "biaochangb",
+    "id": 11438882,
+    "avatar_url": "https://avatars.githubusercontent.com/u/11438882?v=3",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/biaochangb",
+    "html_url": "https://github.com/biaochangb",
+    "followers_url": "https://api.github.com/users/biaochangb/followers",
+    "following_url": "https://api.github.com/users/biaochangb/following{/other_user}",
+    "gists_url": "https://api.github.com/users/biaochangb/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/biaochangb/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/biaochangb/subscriptions",
+    "organizations_url": "https://api.github.com/users/biaochangb/orgs",
+    "repos_url": "https://api.github.com/users/biaochangb/repos",
+    "events_url": "https://api.github.com/users/biaochangb/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/biaochangb/received_events",
+    "type": "User",
+    "site_admin": false
+  },
+  "committer": {
+    "login": "biaochangb",
+    "id": 11438882,
+    "avatar_url": "https://avatars.githubusercontent.com/u/11438882?v=3",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/biaochangb",
+    "html_url": "https://github.com/biaochangb",
+    "followers_url": "https://api.github.com/users/biaochangb/followers",
+    "following_url": "https://api.github.com/users/biaochangb/following{/other_user}",
+    "gists_url": "https://api.github.com/users/biaochangb/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/biaochangb/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/biaochangb/subscriptions",
+    "organizations_url": "https://api.github.com/users/biaochangb/orgs",
+    "repos_url": "https://api.github.com/users/biaochangb/repos",
+    "events_url": "https://api.github.com/users/biaochangb/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/biaochangb/received_events",
+    "type": "User",
+    "site_admin": false
+  },
+  "parents": [
+    {
+      "sha": "cc4694eff6e862d4b5c84ed63e67e7859ab44586",
+      "url": "https://api.github.com/repos/biaochangb/clear2/commits/cc4694eff6e862d4b5c84ed63e67e7859ab44586",
+      "html_url": "https://github.com/biaochangb/clear2/commit/cc4694eff6e862d4b5c84ed63e67e7859ab44586"
+    }
+  ],
+  "stats": {
+    "total": 1,
+    "additions": 1,
+    "deletions": 0
+  },
+  "files": [
+    {
+      "sha": "122b70d62fc65ec2f204a00b5e1d03d80b80f311'.$uid.'",
+      "filename": ".gitignore",
+      "status": "modified",
+      "additions": 1,
+      "deletions": 0,
+      "changes": 1,
+      "blob_url": "https://github.com/biaochangb/clear2/blob/8ffbb5974a1d9e28aa93aefd069610c5162450be/.gitignore",
+      "raw_url": "https://github.com/biaochangb/clear2/raw/8ffbb5974a1d9e28aa93aefd069610c5162450be/.gitignore",
+      "contents_url": "https://api.github.com/repos/biaochangb/clear2/contents/.gitignore?ref=8ffbb5974a1d9e28aa93aefd069610c5162450be",
+      "patch": "@@ -1,6 +1,7 @@\n # Windows image file caches\n Thumbs.db\n ehthumbs.db\n+Runtime/\n \n # Folder config file\n Desktop.ini"
+    },
+    {
+      "sha": "64f72d4e3e7c39858195a41dfad6d56d5cacde62'.$uid.'",
+      "filename": "Public/timeline/js/timeline-min'.$uid.'.js",
+      "status": "added",
+      "additions": 14,
+      "deletions": 0,
+      "changes": 14,
+      "blob_url": "https://github.com/biaochangb/clear2/blob/cc4694eff6e862d4b5c84ed63e67e7859ab44586/Public/timeline/js/timeline-min.js",
+      "raw_url": "https://github.com/biaochangb/clear2/raw/cc4694eff6e862d4b5c84ed63e67e7859ab44586/Public/timeline/js/timeline-min.js",
+      "contents_url": "https://api.github.com/repos/biaochangb/clear2/contents/Public/timeline/js/timeline-min.js?ref=cc4694eff6e862d4b5c84ed63e67e7859ab44586"
+    },
+    {
+      "sha": "4bf360b0cc4df7d6e99d803752adc5a39b956d15'.$uid.'",
+      "filename": "Public/timeline/js/timeline'.$uid.'.js",
+      "status": "added",
+      "additions": 10104,
+      "deletions": 0,
+      "changes": 10104,
+      "blob_url": "https://github.com/biaochangb/clear2/blob/cc4694eff6e862d4b5c84ed63e67e7859ab44586/Public/timeline/js/timeline.js",
+      "raw_url": "https://github.com/biaochangb/clear2/raw/cc4694eff6e862d4b5c84ed63e67e7859ab44586/Public/timeline/js/timeline.js",
+      "contents_url": "https://api.github.com/repos/biaochangb/clear2/contents/Public/timeline/js/timeline.js?ref=cc4694eff6e862d4b5c84ed63e67e7859ab44586"
+    }
+  ]
+}
+';
+		$result['data'] = json_decode($data);
+		$this->ajaxReturn($result, 'jsonp');
+	}
+
     public function profile(){
         	$this->display();
     }
